@@ -1,59 +1,42 @@
 import 'package:flutter/material.dart';
-import 'api_service.dart';
-import 'song_model.dart';
-import 'player_screen.dart';
+import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+import 'providers/music_provider.dart';
+import 'screens/home_screen.dart';
 
 void main() {
-  runApp(MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Set system UI overlay style
+  SystemChrome.setSystemUIOverlayStyle(
+    SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.light,
+      systemNavigationBarColor: Color(0xFF1a0033),
+      systemNavigationBarIconBrightness: Brightness.light,
+    ),
+  );
+
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Music App',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: HomeScreen(),
-    );
-  }
-}
-
-class HomeScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("My Music")),
-      body: FutureBuilder<List<Song>>(
-        future: ApiService.fetchSongs(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text("Error: ${snapshot.error}"));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text("No songs found"));
-          }
-
-          final songs = snapshot.data!;
-          return ListView.builder(
-            itemCount: songs.length,
-            itemBuilder: (context, index) {
-              final song = songs[index];
-              return ListTile(
-                title: Text(song.title),
-                subtitle: Text(song.artist),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => PlayerScreen(song: song)),
-                  );
-                },
-              );
-            },
-          );
-        },
+    return ChangeNotifierProvider(
+      create: (context) => MusicProvider(),
+      child: MaterialApp(
+        title: 'Music Player',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          brightness: Brightness.dark,
+          scaffoldBackgroundColor: Color(0xFF1a0033),
+          primaryColor: Color(0xFF6a11cb),
+          useMaterial3: true,
+        ),
+        home: const HomeScreen(),
       ),
     );
   }
