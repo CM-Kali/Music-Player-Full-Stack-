@@ -4,12 +4,7 @@ class Song {
   final String artist;
   final String audioUrl;
 
-  Song({
-    required this.id,
-    required this.title,
-    required this.artist,
-    required this.audioUrl,
-  });
+  Song({required this.id, required this.title, required this.artist, required this.audioUrl});
 
   factory Song.fromJson(Map<String, dynamic> json) {
     return Song(
