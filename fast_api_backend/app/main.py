@@ -1,67 +1,37 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from app.database import Base, engine
+from app.routes import songs, favorites
 from app.models.song import Song
-from app.routes import songs
+from app.models.favorite import Favorite
+import os
 
 app = FastAPI(title="Music Backend API")
 
+# CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Songs directory
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+SONGS_DIR = os.path.join(BASE_DIR, "songs")
+os.makedirs(SONGS_DIR, exist_ok=True)
+
+app.mount("/media", StaticFiles(directory=SONGS_DIR), name="media")
+
+# Create tables
 Base.metadata.create_all(bind=engine)
 
-app.include_router(songs.router)
+# Routers
+app.include_router(songs.router, prefix="/songs", tags=["Songs"])
+app.include_router(favorites.router, prefix="/favorites", tags=["Favorites"])
 
 @app.get("/")
 def root():
-    return {"status": "Backend is running at http://127.0.0.1:8000"}
-
-
-
-
-
-
-
-
-
-
-# from fastapi import FastAPI
-# from fastapi.staticfiles import StaticFiles
-# from fastapi.middleware.cors import CORSMiddleware
-# import os
-
-# app = FastAPI()  
-
-# # Allow Flutter Web to access backend
-# origins = [
-#     "http://localhost:5000",  # Flutter Web default port
-#     "http://127.0.0.1:5000",
-# ]
-
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=origins,
-#     allow_credentials=True,
-#     allow_methods=["*"],
-#     allow_headers=["*"],
-# )
-
-# # Serve audio files
-# BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-# SONGS_DIR = os.path.join(BASE_DIR, "songs")
-# app.mount("/media", StaticFiles(directory=SONGS_DIR), name="media")
-
-# # Return list of songs
-# @app.get("/songs")
-# def get_songs():
-#     return [
-#         {
-#             "id": 1, 
-#             "title": "Relax Beats",
-#             "artist": "CM Studio",
-#             "audio_url": "http://192.168.10.8:8000/media/song1.mp3"
-#         },
-#         {
-#             "id": 2,
-#             "title": "Night Vibes",
-#             "artist": "CM Studio",
-#             "audio_url": "http://192.168.10.8:8000/media/song2.mp3"
-#         }
-#     ]
+    return {"status": "running"}

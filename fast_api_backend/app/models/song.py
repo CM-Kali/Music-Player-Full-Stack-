@@ -7,5 +7,5 @@ class Song(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, nullable=False)
     artist = Column(String, nullable=False)
-    category = Column(String, nullable=False)
-    audio_url = Column(String, nullable=False)
+    category = Column(String, nullable=True)
+    file_path = Column(String, nullable=False)
